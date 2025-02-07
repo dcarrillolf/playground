@@ -1,0 +1,13 @@
+company.default.locale
+liferay.home
+locales.enabled
+dl.store.impl
+setup.wizard.enabled
+jdbc.default.username
+jdbc.default.password
+jdbc.default.driverClassName
+jdbc.default.url
+cluster.link.enabled
+cluster.link.autodetect.address
+cluster.link.channel.properties.control
+cluster.link.channel.properties.transport.0

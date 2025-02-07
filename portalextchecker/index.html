@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>portal-ext verifier</title>
+    <style>
+    	ul {
+    	   margin-bottom:1rem;
+    	}
+    </style>
+</head>
+<body>
+    <h2>portal-ext verifier</h2>
+
+    <!-- Pegar portal-check.properties -->
+    <label><strong>Explicitly verify the following properties:</strong></label><br>
+    <textarea id="portalCheckText" rows="5" cols="60">
+setup.wizard.enabled
+company.default.locale
+liferay.home
+locales
+locales.enabled
+locales.beta
+time.zones
+dl.store.impl
+jdbc.default.username
+jdbc.default.password
+jdbc.default.driverClassName
+jdbc.default.url
+cluster.link.enabled
+cluster.link.autodetect.address
+cluster.link.channel.properties.control
+cluster.link.channel.properties.transport.0
+    </textarea>
+    <br><br>
+
+    <label><strong>Copy portal-ext to be verified</strong></label><br>
+    <textarea id="inputProperties" rows="10" cols="120"></textarea>
+    <br><br>
+
+    <label><strong>Load target Liferay version portal.properties files:</strong></label>
+    <input type="file" id="portalAllFile"><br><br>
+
+    <button onclick="handleFiles()">Generar Informe</button>
+
+    <h3>Informe:</h3>
+    <div id="report"></div>
+
+    <script>
+        let portalAllText = "";
+
+        // Read portal-all.properties
+        document.getElementById("portalAllFile").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { portalAllText = e.target.result; };
+                reader.readAsText(file);
+            }
+        });
+
+        function handleFiles() {
+            const inputText = document.getElementById("inputProperties").value;
+            const portalCheckText = document.getElementById("portalCheckText").value;
+            
+            const parsedProperties = parseProperties(inputText);
+            const portalAll = parseProperties(portalAllText);
+            const portalCheckList = portalCheckText.split("\n").map(line => line.trim()).filter(line => line);
+
+            generateReport(parsedProperties, portalAll, portalCheckList);
+        }
+
+        function parseProperties(text) {
+            const properties = {};
+            const duplicates = new Set();
+            const lines = text.split("\n");
+
+            let currentKey = null;
+            let currentValue = "";
+            let isMultiline = false;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line || line.startsWith("#")) return;
+
+                if (isMultiline) {
+                    // Si la línea es una continuación, eliminar `\` y concatenar
+                    if (line.endsWith("\\")) {
+                        currentValue += line.slice(0, -1).trim() + " ";
+                    } else {
+                        currentValue += line.trim();
+                        properties[currentKey] = currentValue.trim();
+                        isMultiline = false;
+                    }
+                } else {
+                    // Procesar línea normal con `=`
+                    const [key, ...value] = line.split("=");
+                    if (key) {
+                        const trimmedKey = key.trim();
+                        const trimmedValue = value.join("=").trim();
+
+                        if (properties.hasOwnProperty(trimmedKey)) {
+                            duplicates.add(trimmedKey);
+                        }
+
+                        if (trimmedValue.endsWith("\\")) {
+                            // Si el valor termina en `\`, es una línea multi-línea
+                            currentKey = trimmedKey;
+                            currentValue = trimmedValue.slice(0, -1).trim() + " ";
+                            isMultiline = true;
+                        } else {
+                            properties[trimmedKey] = trimmedValue;
+                        }
+                    }
+                }
+            });
+
+            return { properties, duplicates };
+        }
+
+        function generateReport(parsed, portalAll, portalCheckList) {
+            let reportHtml = "<ul>";
+            
+            // Duplicates
+            if (parsed.duplicates.size > 0) {
+                reportHtml += "<li><strong>Duplicate properties:</strong><ul>";
+                parsed.duplicates.forEach(prop => {
+                    reportHtml += `<li>${prop}</li>`;
+                });
+                reportHtml += "</ul></li>";
+            }
+
+            // Missing properties
+            const sobrantes = Object.keys(parsed.properties).filter(p => !portalAll.properties.hasOwnProperty(p));
+            if (sobrantes.length > 0) {
+                reportHtml += "<li><strong>Missing properties (not found in target portal.properties):</strong><ul>";
+                sobrantes.forEach(prop => {
+                    reportHtml += `<li><b>${prop}</b> (Default value: ${parsed.properties[prop]})</li>`;
+                });
+                reportHtml += "</ul></li>";
+            }
+
+            // Propiedades de portal-check
+            reportHtml += "<li><strong>Verified properties:</strong><ul>";
+            portalCheckList.forEach(prop => {
+                if (parsed.properties.hasOwnProperty(prop)) {
+                    reportHtml += `<li><b>${prop}</b>: ${parsed.properties[prop]}</li>`;
+                } else {
+                    const defaultValue = portalAll.properties[prop] || "<em>Not found</em>";
+                    reportHtml += `<li><b>${prop}</b> not found, default value: '${defaultValue}'</li>`;
+                }
+            });
+            reportHtml += "</ul></li>";
+            
+            reportHtml += "</ul>";
+            document.getElementById("report").innerHTML = reportHtml;
+        }
+    </script>
+</body>
+</html>
+
