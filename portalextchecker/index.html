@@ -131,24 +131,33 @@ cluster.link.channel.properties.transport.0
                 reportHtml += "</ul></li>";
             }
 
-            // Missing properties
-            const sobrantes = Object.keys(parsed.properties).filter(p => !portalAll.properties.hasOwnProperty(p));
-            if (sobrantes.length > 0) {
-                reportHtml += "<li><strong>Missing properties (not found in target portal.properties):</strong><ul>";
-                sobrantes.forEach(prop => {
-                    reportHtml += `<li><b>${prop}</b> (Default value: ${parsed.properties[prop]})</li>`;
-                });
-                reportHtml += "</ul></li>";
-            }
+	    var portalAllLoaded=(Object.keys(portalAll.properties).length > 0);
 
+            // Missing properties
+            if (portalAllLoaded) {
+	            const sobrantes = Object.keys(parsed.properties).filter(p => !portalAll.properties.hasOwnProperty(p));
+            
+		    if (sobrantes.length > 0) {
+		        reportHtml += "<li><strong>Missing properties (not found in target portal.properties):</strong><ul>";
+		        sobrantes.forEach(prop => {
+		            reportHtml += `<li><b>${prop}</b> (Default value: ${parsed.properties[prop]})</li>`;
+		        });
+		        reportHtml += "</ul></li>";
+		    }
+	    }
+	    
             // Propiedades de portal-check
             reportHtml += "<li><strong>Verified properties:</strong><ul>";
             portalCheckList.forEach(prop => {
                 if (parsed.properties.hasOwnProperty(prop)) {
                     reportHtml += `<li><b>${prop}</b>: ${parsed.properties[prop]}</li>`;
                 } else {
-                    const defaultValue = portalAll.properties[prop] || "<em>Not found</em>";
-                    reportHtml += `<li><b>${prop}</b> not found, default value: '${defaultValue}'</li>`;
+                   if (portalAllLoaded) {
+                      const defaultValue = portalAll.properties[prop] || "<em>Not found</em>";
+                      reportHtml += `<li><b>${prop}</b> not found, default value: '${defaultValue}'</li>`;                   
+                   } else {
+                       reportHtml += `<li><b>${prop}</b> not found.</li>`;        
+                   }
                 }
             });
             reportHtml += "</ul></li>";
