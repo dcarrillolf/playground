@@ -19,7 +19,6 @@ function setPodBackground(background, quickWin) {
    if (curSelector && curSelector.firstElementChild && quickWin) {
       curSelector.firstElementChild.style.color="yellow";
       curSelector.firstElementChild.style.fill="yellow";
-      curSelector.style.background="rgb(3, 54, 61)";
       curSelector.style.background="linear-gradient("+background+" 0%, "+background+" 75%, yellow 90%, yellow 100%)";
    } else {
       curSelector.firstElementChild.style.color="rgb(216, 220, 222)";
