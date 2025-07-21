@@ -2,7 +2,7 @@
 // @name        CheckPOD Colors
 // @namespace   Violentmonkey Scripts
 // @match       https://liferay-support.zendesk.com/*
-// @grant       none
+// @grant       unsafeWindow
 // @version     1.1
 // @author      -
 // @description 9/19/2024, 1:51:51 PM
