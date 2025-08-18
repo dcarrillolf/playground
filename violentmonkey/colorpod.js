@@ -5,7 +5,7 @@
 // @grant       unsafeWindow
 // @version     1.1
 // @author      -
-// @description 9/19/2024, 1:51:51 PM
+// @description Last Update 2025.07.21
 // ==/UserScript==
 
 function setPodBackground(background, quickWin) {
