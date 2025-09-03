@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://liferay-support.zendesk.com/*
 // @grant       unsafeWindow
-// @version     1.1
+// @version     1.1.1
 // @author      -
 // @description Last Update 2025.07.21
 // ==/UserScript==
