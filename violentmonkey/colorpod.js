@@ -30,7 +30,7 @@ function setPodBackground(background, quickWin) {
 
 
 function customCheckPod(ticketId) {
-    var element = document.querySelector(".property_box[data-ticket-id='"+ticketId+"'] .ember-view.form_field.lesa-ui-form-field.lesa-ui-suborganization>div");
+    var element = document.querySelector("[data-ticket-id='"+ticketId+"'] .ember-view.form_field.lesa-ui-form-field.lesa-ui-suborganization>div");
     if (element) {
         var quickWin = document.querySelector("div.lesa-ui-priority[data-ticket-id='"+ticketId+"'] span.lesa-ui-quickwin") !== null;
         if (element.textContent === "Spain Pod C") {
